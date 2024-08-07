@@ -5,3 +5,4 @@ Hello, this repo is my attempt at implementing a version of [PyTorch's autograd]
 #### Note
 1. I am extremely bad and new to C. A lot of things I am learning for the first time. Imagine a 5th grader trying to write code, and this is what it will be like.
 2. I will write this repo for the purposes of functionality, not optimality or efficiecny. If it works, it ships.
+3. Criticism is welcome :) 
