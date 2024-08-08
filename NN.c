@@ -18,14 +18,14 @@ Tensor* linear_forward(Linear* layer, Tensor *input) {
 
     // THE 2D CASE
     Tensor* output = multiply(input, layer->weight);
-    // output = add(layer->bias, &output);
+    output = add(layer->bias, output);
     return output;
 }
 
 // For now, the Neaural Network will only support the 1D case
-Linear linear(int proj_dim[2], int bias_dim[0], init_type _init_type) {
+Linear* linear(int proj_dim[2], int bias_dim[0], init_type _init_type) {
     // `proj_dim` should be of shape: {input_dim, output_dim}
-    if (proj_dim[0] != bias_dim[0]) {
+    if (proj_dim[1] != bias_dim[0]) {
         printf("The input and output dimensions of the weight and bias must be the same\n");
         exit(1);
     }
@@ -44,7 +44,7 @@ Linear linear(int proj_dim[2], int bias_dim[0], init_type _init_type) {
     }
     linear->forward = linear_forward;
 
-    return *linear;
+    return linear;
 }
 
 

@@ -10,6 +10,8 @@ Sepcifically, the plan is to make the following operations:
 #include "tensor_utils.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <assert.h>
+
 
 
 Tensor* multiply2d(Tensor *m1, Tensor *m2) {
@@ -27,16 +29,13 @@ Tensor* multiply2d(Tensor *m1, Tensor *m2) {
         exit(EXIT_FAILURE);
     }
 
-    // Tensor* output = malloc(sizeof(Tensor));
-
     Tensor* output = tensor((int[]){ m2_cols}, 1);
 
-    for (int i = 0; i < m1_rows; i++) {
-        for (int j = 0; j < m2_cols; j++) {
-            ((*output).data)[i * m2_cols + j] = 0;
-            for (int k = 0; k < m1_cols; k++) {
-                ((*output).data)[i * m2_cols + j] += m1->data[i * m1_cols + k] * m2->data[k * m2_cols + j];
-            }
+    for (int j = 0; j < m2_cols; j++) { // M2 Cols (also M1 Cols)
+        ((*output).data)[j] = 0;
+        for (int k = 0; k < m2_rows; k++) { // M2 Rows
+            int m2_index = k * m2_cols + j;
+            ((*output).data)[j] += m1->data[j] * ((float**) m2->data)[k][j]; 
         }
     }
 
@@ -45,21 +44,43 @@ Tensor* multiply2d(Tensor *m1, Tensor *m2) {
     return output;
 }
 
+
+
+Tensor* add1d(Tensor *a1,Tensor *a2) {
+    assert(a1->dim==TENSOR_1D && a2->dim==TENSOR_1D);
+
+    if (a1->size[0] != a2->size[0]) {
+        printf("func: add1d: Got mismatching sizes: (%d,) and (%d,)\n", a1->size[0], a2->size[0]);
+        exit(EXIT_FAILURE);
+    }
+
+    Tensor* output = tensor((int[]){a1->size[0]}, 1);
+
+    for (int i = 0; i < a1->size[0]; i++) {
+        ((float*)output->data)[i] = ((float*)a1->data)[i] + ((float*)a2->data)[i];
+    }
+
+    return output;
+}
+
+
+
 typedef struct {
     int valid;
-    Tensor* (*func)(Tensor*, Tensor*);
-} optionMap;
+    Tensor* (*multiply)(Tensor*, Tensor*);
+    Tensor* (*add)(Tensor*, Tensor*);
+} operationMap;
+
+static operationMap OP_MAPPINGS[4][4] = {
+    [1][1] = {1, NULL, add1d},
+    [1][2] = {1, multiply2d, NULL},
+};
 
 Tensor* multiply(Tensor *m1, Tensor *m2) {
     Tensor* output;
 
-    optionMap vr[4][4] = {0};
-    vr[1][2].valid = 1;
-    vr[1][2].func = multiply2d;
-
-    // 1D Case
-    if (vr[m1->dim][m2->dim].valid && (vr[m1->dim][m2->dim].func != NULL)) {
-        output = vr[m1->dim][m2->dim].func(m1, m2);
+    if (OP_MAPPINGS[m1->dim][m2->dim].valid && (OP_MAPPINGS[m1->dim][m2->dim].multiply != NULL)) {
+        output = OP_MAPPINGS[m1->dim][m2->dim].multiply(m1, m2);
     } 
     else {
         printf("%d | %d\n", m1->dim, m2->dim);
@@ -83,4 +104,18 @@ Tensor* multiply(Tensor *m1, Tensor *m2) {
 }
 
 
-Tensor add(Tensor *a1,Tensor *a2) {}
+Tensor* add(Tensor *a1,Tensor *a2) {
+    Tensor* output;
+
+    if (OP_MAPPINGS[a1->dim][a2->dim].valid && (OP_MAPPINGS[a1->dim][a2->dim].add != NULL)) {
+        output = OP_MAPPINGS[a1->dim][a2->dim].add(a1, a2);
+    } 
+    else {
+        printf("%d | %d\n", a1->dim, a2->dim);
+        printf("func: add: Unsupported tensor dimension\n");
+        exit(EXIT_FAILURE);
+    }
+
+    return output;
+}
+
