@@ -65,43 +65,33 @@ typedef struct {
     GradMethod* gra_op;
 } Tensor;
 
-Tensor tensor(int size[], int dims) {
+
+Tensor* tensor(int size[], int dims) {
     n_dims N_dims = DIM_MAP[dims];
-    Tensor *tensor = (Tensor*)malloc(sizeof(Tensor)); // put the tensor on the heap
-    tensor->size = size;
+    
+    Tensor* tensor = (Tensor*)malloc(sizeof(Tensor));
+    if (tensor == NULL) {
+        printf("Memory allocation failed for tensor.\n");
+        exit(EXIT_FAILURE);
+    }
+
+    tensor->size = (int*)malloc(dims * sizeof(int));
+    if (tensor->size == NULL) {
+        printf("Memory allocation failed for tensor size.\n");
+        free(tensor);
+        exit(EXIT_FAILURE);
+    }
+
+    for (int i = 0; i < dims; i++) {
+        tensor->size[i] = size[i];
+    }
+
     tensor->dim = N_dims;
     tensor->data = init_tensor_data(size, N_dims);
     tensor->grad = 0.0;
+    tensor->gra_op = NULL; // Initialize gra_op as needed
 
-    return *tensor;
+    return tensor;
 }
-
-// Tensor* tensor(int size[], int dims) {
-//     n_dims N_dims = DIM_MAP[dims];
-    
-//     Tensor* tensor = (Tensor*)malloc(sizeof(Tensor));
-//     if (tensor == NULL) {
-//         printf("Memory allocation failed for tensor.\n");
-//         exit(EXIT_FAILURE);
-//     }
-
-//     tensor->size = (int*)malloc(dims * sizeof(int));
-//     if (tensor->size == NULL) {
-//         printf("Memory allocation failed for tensor size.\n");
-//         free(tensor);
-//         exit(EXIT_FAILURE);
-//     }
-
-//     for (int i = 0; i < dims; i++) {
-//         tensor->size[i] = size[i];
-//     }
-
-//     tensor->dim = N_dims;
-//     tensor->data = init_tensor_data(size, N_dims);
-//     tensor->grad = 0.0;
-//     tensor->gra_op = NULL; // Initialize gra_op as needed
-
-//     return tensor;
-// }
 
 #endif

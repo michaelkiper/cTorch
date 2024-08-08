@@ -6,19 +6,19 @@
 
 typedef struct Linear Linear;
 struct Linear {
-    Tensor weight;
-    Tensor bias;
-    Tensor (*forward)(Linear*, Tensor*);
+    Tensor* weight;
+    Tensor* bias;
+    Tensor* (*forward)(Linear*, Tensor*);
 };
 
-Tensor linear_forward(Linear* layer, Tensor *input) {
+Tensor* linear_forward(Linear* layer, Tensor *input) {
     if (input->dim != TENSOR_1D) {
         return handle_error("The input tensor must be 1D", EINVAL);
     }
 
     // THE 2D CASE
-    Tensor output = multiply(input, &layer->weight);
-    output = add(&layer->bias, &output);
+    Tensor* output = multiply(input, layer->weight);
+    // output = add(layer->bias, &output);
     return output;
 }
 
@@ -33,13 +33,13 @@ Linear linear(int proj_dim[2], int bias_dim[0], init_type _init_type) {
     linear->weight = tensor(proj_dim, 2);
     linear->bias = tensor(bias_dim, 1);
 
-    one_init(&(linear->bias)); // one init the bias
+    one_init(linear->bias); // one init the bias
     switch (_init_type) {
         case (KAIMING): {
-            kaiming_uniform_init(&(linear->weight));
+            kaiming_uniform_init(linear->weight);
         }
         case (XAVIER): {
-            xavier_uniform_init(&(linear->weight));
+            xavier_uniform_init(linear->weight);
         }
     }
     linear->forward = linear_forward;

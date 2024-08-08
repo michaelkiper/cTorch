@@ -23,11 +23,11 @@ int main (int argc, char *argv[]) {
 
     Linear l = linear((int[]){3, 4}, (int[]){3}, KAIMING);
     printf("\n\nWeight\n");
-    print_tensor(&(l.weight));
+    print_tensor(l.weight);
 
     printf("\n\nBias\n");
-    print_tensor(&(l.bias));
-    Tensor o = ReLU(&(l.weight));
+    print_tensor(l.bias);
+    Tensor o = ReLU(l.weight);
     printf("\n\n");
     print_tensor(&o);
 
@@ -35,15 +35,7 @@ int main (int argc, char *argv[]) {
 }
 
 
-void test_linear_forward() {
-    Tensor t = tensor((int[]){3, 2, 3}, 3);
-
-    Linear l = linear((int[]){3, 4}, (int[]){3}, KAIMING);
-
-    linear_forward(&l, &t);
-}
-
 void test_multiply_2d(Tensor *m1, Tensor *m2) {
-    Tensor output = multiply(m1, m2);
-    print_tensor(&output);
+    Tensor* output = multiply(m1, m2);
+    print_tensor(output);
 }

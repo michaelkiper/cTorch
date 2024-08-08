@@ -35,22 +35,21 @@ int ndims(n_dims N_dims) {
 
 Tensor copy_data(Tensor *input) {
     int size[] = {input->size[0], input->size[1]}; // QUESTION: why the hell does this result in a segfault if I don't include this?
-    Tensor output = tensor(input->size, ndims(input->dim));
+    Tensor* output = tensor(input->size, ndims(input->dim));
     int num_elements = 1;
     for (int i = 0; i < ARRAYSIZE(input->size); i++) {
         num_elements *= input->size[i];
     }
     
-    memcpy(output.data, input->data, num_elements * sizeof(float));
+    memcpy((*output).data, input->data, num_elements * sizeof(float));
 
-    return output;
+    return *output;
 }
 
-Tensor handle_error(const char *message, int errorno) {
+Tensor* handle_error(const char *message, int errorno) {
     fprintf(stderr, "%s\n", message);
     errno = errorno;
-    Tensor null_tensor = {0};
-    return null_tensor;
+    return NULL;
 }
 
 void _print_1D(float* tensor, int size[]) {

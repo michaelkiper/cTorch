@@ -22,11 +22,6 @@ Tensor* multiply2d(Tensor *m1, Tensor *m2) {
     int m2_rows = m2->size[0];
     int m2_cols = m2->size[1];
 
-    printf("m1_rows: %d\n", m1_rows);
-    printf("m1_cols: %d\n", m1_cols);
-    printf("m2_rows: %d\n", m2_rows);
-    printf("m2_cols: %d\n", m2_cols);
-
     if (m1_cols != m2_rows) {
         printf("The number of columns in the first matrix must be equal to the number of rows in the second matrix\n");
         exit(EXIT_FAILURE);
@@ -34,23 +29,20 @@ Tensor* multiply2d(Tensor *m1, Tensor *m2) {
 
     // Tensor* output = malloc(sizeof(Tensor));
 
-    Tensor output = tensor((int[]){ m2_cols}, 1);
+    Tensor* output = tensor((int[]){ m2_cols}, 1);
 
     for (int i = 0; i < m1_rows; i++) {
         for (int j = 0; j < m2_cols; j++) {
-            output.data[i * m2_cols + j] = 0;
+            ((*output).data)[i * m2_cols + j] = 0;
             for (int k = 0; k < m1_cols; k++) {
-                output.data[i * m2_cols + j] += m1->data[i * m1_cols + k] * m2->data[k * m2_cols + j];
+                ((*output).data)[i * m2_cols + j] += m1->data[i * m1_cols + k] * m2->data[k * m2_cols + j];
             }
         }
     }
 
     // TODO: Need to update the gradient info here
 
-    printf("Inter Output\n");
-    print_tensor(&output);
-
-    return &output;
+    return output;
 }
 
 typedef struct {
@@ -58,7 +50,7 @@ typedef struct {
     Tensor* (*func)(Tensor*, Tensor*);
 } optionMap;
 
-Tensor multiply(Tensor *m1, Tensor *m2) {
+Tensor* multiply(Tensor *m1, Tensor *m2) {
     Tensor* output;
 
     optionMap vr[4][4] = {0};
@@ -87,10 +79,7 @@ Tensor multiply(Tensor *m1, Tensor *m2) {
     //     }
     // }
 
-    printf("Inter Output 2\n");
-    print_tensor(output);
-
-    return *output;
+    return output;
 }
 
 
