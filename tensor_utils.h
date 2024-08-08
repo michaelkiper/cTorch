@@ -4,6 +4,7 @@
 #include "tensor.c"
 #include <math.h>
 #include <string.h>
+#include <errno.h>
 
 typedef unsigned int init;
 #define UNIFORM 0
@@ -45,7 +46,12 @@ Tensor copy_data(Tensor *input) {
     return output;
 }
 
-
+Tensor handle_error(const char *message, int errorno) {
+    fprintf(stderr, "%s\n", message);
+    errno = errorno;
+    Tensor null_tensor = {0};
+    return null_tensor;
+}
 
 void _print_1D(float* tensor, int size[]) {
     printf("\n\t\t");

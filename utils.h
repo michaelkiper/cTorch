@@ -1,13 +1,13 @@
 #ifndef UTILS_H_
 #define UTILS_H_
 
-#define ARRAYSIZE(a) (sizeof(a) / sizeof(a[0]))
+#define ARRAYSIZE(a) (sizeof(a) / sizeof((a)[0]))
 
 #define PREFIX(var) new_##var
 
 #define GENERIC_ADD(type)                 \
     type add_##type(type (a), type (b)) { \
-        return a + b;                     \
+        return (a) + (b);                 \
     }
 
 

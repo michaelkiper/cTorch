@@ -2,6 +2,7 @@
 #include "tensor_op.c"
 #include "tensor_utils.h"
 #include <math.h>
+#include <errno.h>
 
 typedef struct Linear Linear;
 struct Linear {
@@ -11,18 +12,17 @@ struct Linear {
 };
 
 Tensor linear_forward(Linear* layer, Tensor *input) {
-    if (input->dim != TENSOR_2D) {
-        printf("The input tensor must be 2D\n");
-        exit(1);
+    if (input->dim != TENSOR_1D) {
+        return handle_error("The input tensor must be 1D", EINVAL);
     }
 
     // THE 2D CASE
-    Tensor output = multiply(&layer->weight, input);
+    Tensor output = multiply(input, &layer->weight);
     output = add(&layer->bias, &output);
     return output;
 }
 
-
+// For now, the Neaural Network will only support the 1D case
 Linear linear(int proj_dim[2], int bias_dim[0], init_type _init_type) {
     // `proj_dim` should be of shape: {input_dim, output_dim}
     if (proj_dim[0] != bias_dim[0]) {
