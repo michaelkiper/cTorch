@@ -43,6 +43,10 @@ void test_linear_forward(bool debug) {
         printf("\nOutput:\n");
         print_tensor(output);
     }
+
+    free(t);
+    free(l);
+    free(output);
 }
 
 int main (int argc, char *argv[]) {

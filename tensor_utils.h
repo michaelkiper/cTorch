@@ -33,7 +33,7 @@ int ndims(n_dims N_dims) {
     exit(1);
 }
 
-Tensor copy_data(Tensor *input) {
+Tensor* copy_data(Tensor *input) {
     int size[] = {input->size[0], input->size[1]}; // QUESTION: why the hell does this result in a segfault if I don't include this?
     Tensor* output = tensor(input->size, ndims(input->dim));
     int num_elements = 1;
@@ -43,7 +43,7 @@ Tensor copy_data(Tensor *input) {
     
     memcpy((*output).data, input->data, num_elements * sizeof(float));
 
-    return *output;
+    return output;
 }
 
 Tensor* handle_error(const char *message, int errorno) {

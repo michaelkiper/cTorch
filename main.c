@@ -32,10 +32,14 @@ int main (int argc, char *argv[]) {
     print_tensor(o);
 
     (*l).forward(l, o);
+
+    free(l);
+    free(o);
 }
 
 
 void test_multiply_2d(Tensor *m1, Tensor *m2) {
     Tensor* output = multiply(m1, m2);
     print_tensor(output);
+    free(output);
 }

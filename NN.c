@@ -48,9 +48,9 @@ Linear* linear_1d(int proj_dim[2], int bias_dim[0], init_type _init_type) {
 
 
 Tensor* non_linearity(Tensor *input, float (*nl)(Tensor*, float)){
-    Tensor output = copy_data(input);
-    initer(&output, nl);
-    return &output;
+    Tensor* output = copy_data(input);
+    initer(output, nl);
+    return output;
 }
 
 float _relu_func(Tensor *t, float val) {
