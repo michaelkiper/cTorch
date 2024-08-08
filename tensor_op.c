@@ -60,6 +60,8 @@ Tensor* add1d(Tensor *a1,Tensor *a2) {
         ((float*)output->data)[i] = ((float*)a1->data)[i] + ((float*)a2->data)[i];
     }
 
+    // TODO: Need to update the gradient info here
+
     return output;
 }
 

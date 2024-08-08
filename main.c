@@ -21,17 +21,17 @@ int main (int argc, char *argv[]) {
     // kaiming_uniform_init(t3);
     // print_tensor(t3);
 
-    Linear* l = linear((int[]){3, 4}, (int[]){3}, KAIMING);
+    Linear* l = linear_1d((int[]){3, 4}, (int[]){3}, KAIMING);
     printf("\n\nWeight\n");
     print_tensor((*l).weight);
 
     printf("\n\nBias\n");
     print_tensor((*l).bias);
-    Tensor o = ReLU((*l).weight);
+    Tensor* o = ReLU((*l).weight);
     printf("\n\n");
-    print_tensor(&o);
+    print_tensor(o);
 
-    linear_forward(l, &o);
+    (*l).forward(l, o);
 }
 
 
