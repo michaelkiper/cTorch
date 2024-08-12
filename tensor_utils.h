@@ -1,7 +1,8 @@
 #ifndef TENSOR_UTILS_H_
 #define TENSOR_UTILS_H_
 #include <stdio.h>
-#include "tensor.c"
+#include "tensor.h"
+#include "utils.h"
 #include <math.h>
 #include <string.h>
 #include <errno.h>
@@ -44,6 +45,16 @@ Tensor* copy_data(Tensor *input) {
     memcpy((*output).data, input->data, num_elements * sizeof(float));
 
     return output;
+}
+
+void free_tensor(Tensor* input) {
+    free(input->data);
+    free(input->grad_op);
+    free(input->size);
+    input->data = NULL;
+    input->grad_op = NULL;
+    input->size = NULL;
+    free(input);
 }
 
 Tensor* handle_error(const char *message, int errorno) {
@@ -221,6 +232,12 @@ float one_sampler(Tensor *t, float _) {
 void one_init(Tensor *t) {
     initer(t, one_sampler);
 }
+
+
+void custom_init(Tensor *t, float data[]) {
+    initer(t, NULL);
+}
+
 
 float kaiming_sampler(Tensor *t, float _) {
     /* 

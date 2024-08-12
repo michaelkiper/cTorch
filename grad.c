@@ -17,6 +17,7 @@ If the function is not a deterministic mapping (i.e. it is not a mathematical fu
 */
 
 #include "tensor.h"
+#include "tensor_utils.h"
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -54,29 +55,47 @@ If the function is not a deterministic mapping (i.e. it is not a mathematical fu
 //     t0->size[0] = 1;
 
 //     t0->dim = TENSOR_1D;
-//     t0->gra_op = NULL;
+//     t0->grad_op = NULL;
 //     return t0;
 // }
 
-Tensor* backwards(Tensor* t, Tensor* wrt) {
+void backwards(Tensor* t, Tensor* wrt) {
     // Tensor* set[2];
     // set[0] = t;
     // set[1] = _init_root_tensor();
     
-    return t->gra_op->method(t->gra_op->ctx_tensors);
+    t->grad_op->method(t->grad_op->ctx_tensors, wrt);
 }
 
-Tensor* multiply_backwards(Tensor* ctx[2]) {
-    // if ((*ctx).gra_op != NULL && (*(*ctx).gra_op).ctx != NULL) {
-    //     return (*(*ctx).gra_op).method((*(*ctx).gra_op).ctx);
-    // }
-
+void matmul_backwards(Tensor* ctx[2], Tensor* wrt) {
     Tensor* A = ctx[0];
     Tensor* B = ctx[1];
+
+    int m = A->size[0]; // Rows of A
+    int n = A->size[1]; // Columns of A / Rows of B
+    int p = B->size[1]; // Columns of B
+    
+    Tensor* dA = tensor(A->size, 2);
+    Tensor* dB = tensor(A->size, 2);
+
+    // Compute the gradients
+    for (int i = 0; i < m; i++) {
+        for (int j = 0; j < p; j++) {
+            for (int k = 0; k < n; k++) {
+                ((float**)(dA->data))[i][k] += ((float**)(wrt->data))[i][j] * ((float**)(B->data))[k][j];
+                ((float**)(dB->data))[k][j] += ((float**)(wrt->data))[i][j] * ((float**)(A->data))[i][k];
+            }
+        }
+    }
+
+    printf("dA:\n");
+    print_tensor(dA);
+    printf("dB:\n");
+    print_tensor(dB);
 }
 
-Tensor* add_backwards(Tensor* ctx) {
-    // if ((*ctx).gra_op != NULL && (*(*ctx).gra_op).ctx != NULL) {
+void add_backwards(Tensor* ctx) {
+    // if ((*ctx).grad_op != NULL && (*(*ctx).grad_op).ctx != NULL) {
     //     Tensor* t = _init_root_tensor();
     //     t->data[0] = 0.0f;
     //     return t;

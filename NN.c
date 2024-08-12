@@ -1,4 +1,4 @@
-#include "tensor.c"
+#include "tensor.h"
 #include "tensor_op.c"
 #include "tensor_utils.h"
 #include <math.h>
@@ -16,7 +16,7 @@ Tensor* linear_forward_1d(Linear* layer, Tensor *input) {
         return handle_error("The input tensor must be 1D", EINVAL);
     }
 
-    Tensor* output = multiply(input, layer->weight);
+    Tensor* output = matmul(input, layer->weight);
     output = add(layer->bias, output);
     return output;
 }

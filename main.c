@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "tensor.c"
+#include "tensor.h"
 #include "tensor_utils.h"
 #include "utils.h"
 #include "NN.c"
@@ -38,8 +38,8 @@ int main (int argc, char *argv[]) {
 }
 
 
-void test_multiply_2d(Tensor *m1, Tensor *m2) {
-    Tensor* output = multiply(m1, m2);
+void test_matmul_2d(Tensor *m1, Tensor *m2) {
+    Tensor* output = matmul(m1, m2);
     print_tensor(output);
     free(output);
 }

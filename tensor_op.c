@@ -6,7 +6,7 @@ Sepcifically, the plan is to make the following operations:
 • Transpose
 • Softmax
 */
-#include "tensor.c"
+#include "tensor.h"
 #include "tensor_utils.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -14,7 +14,7 @@ Sepcifically, the plan is to make the following operations:
 
 
 
-Tensor* multiply2d(Tensor *m1, Tensor *m2) {
+Tensor* matmul2d(Tensor *m1, Tensor *m2) {
     // m1 needs to be a 1xN matrix
     // m2 needs to be a NxM matrix
     // The output will be a 1xM matrix
@@ -69,35 +69,35 @@ Tensor* add1d(Tensor *a1,Tensor *a2) {
 
 typedef struct {
     int valid;
-    Tensor* (*multiply)(Tensor*, Tensor*);
+    Tensor* (*matmul)(Tensor*, Tensor*);
     Tensor* (*add)(Tensor*, Tensor*);
 } operationMap;
 
 static operationMap OP_MAPPINGS[4][4] = {
     [1][1] = {1, NULL, add1d},
-    [1][2] = {1, multiply2d, NULL},
+    [1][2] = {1, matmul2d, NULL},
 };
 
-Tensor* multiply(Tensor *m1, Tensor *m2) {
+Tensor* matmul(Tensor *m1, Tensor *m2) {
     Tensor* output;
 
-    if (OP_MAPPINGS[m1->dim][m2->dim].valid && (OP_MAPPINGS[m1->dim][m2->dim].multiply != NULL)) {
-        output = OP_MAPPINGS[m1->dim][m2->dim].multiply(m1, m2);
+    if (OP_MAPPINGS[m1->dim][m2->dim].valid && (OP_MAPPINGS[m1->dim][m2->dim].matmul != NULL)) {
+        output = OP_MAPPINGS[m1->dim][m2->dim].matmul(m1, m2);
     } 
     else {
         printf("%d | %d\n", m1->dim, m2->dim);
-        printf("func: multiply: Unsupported tensor dimension\n");
+        printf("func: matmul: Unsupported tensor dimension\n");
         exit(EXIT_FAILURE);
     }
 
     // switch (m1->dim, m2->dim) {
     //     case (TENSOR_1D, TENSOR_2D): { 
-    //         output = multiply2d(m1, m2);
+    //         output = matmul2d(m1, m2);
     //         break;
     //     }
     //     default: {
     //         printf("%d | %d\n", m1->dim, m2->dim);
-    //         printf("func: multiply: Unsupported tensor dimension\n");
+    //         printf("func: matmul: Unsupported tensor dimension\n");
     //         exit(EXIT_FAILURE);
     //     }
     // }
