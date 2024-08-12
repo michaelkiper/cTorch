@@ -1,5 +1,5 @@
 /*
-This file will contain the generic matric operations.
+This file will contain the generic matrix operations.
 Sepcifically, the plan is to make the following operations:
 • Add
 • Multiply

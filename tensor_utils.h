@@ -123,7 +123,7 @@ void print_tensor(Tensor *tensor) {
             exit(1);
     }
 
-    printf("\n\tGrad: \n\t\t%lf\n", tensor->grad);
+    // printf("\n\tGrad: \n\t\t%lf\n", tensor->grad);
 }
 
 

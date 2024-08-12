@@ -1,22 +1,10 @@
-#ifndef TENSOR_H_
-#define TENSOR_H_
+#ifndef TENSOR_C
+#define TENSOR_C
 #include <stdio.h>
 #include <stdlib.h>
 #include "grad.c"
 #include "utils.h"
-
-typedef unsigned int n_dims;
-#define TENSOR_1D (1 << 0)
-#define TENSOR_2D (1 << 1)
-#define TENSOR_3D (1 << 2)
-#define TENSOR_4D (1 << 3)
-
-static int DIM_MAP[] = {
-    [1] = TENSOR_1D,
-    [2] = TENSOR_2D,
-    [3] = TENSOR_3D,
-    [4] = TENSOR_4D,
-};
+#include "tensor.h"
 
 
 void* init_tensor_data(int size[], n_dims N_dims) {
@@ -57,14 +45,6 @@ void* init_tensor_data(int size[], n_dims N_dims) {
     }
 }
 
-typedef struct {
-    float* data;
-    int* size;
-    n_dims dim;
-    double grad;
-    GradMethod* gra_op;
-} Tensor;
-
 
 Tensor* tensor(int size[], int dims) {
     n_dims N_dims = DIM_MAP[dims];
@@ -88,9 +68,17 @@ Tensor* tensor(int size[], int dims) {
 
     tensor->dim = N_dims;
     tensor->data = init_tensor_data(size, N_dims);
-    tensor->grad = 0.0;
-    tensor->gra_op = NULL; // Initialize gra_op as needed
-
+    tensor->grad = NULL;
+    tensor->gra_op = NULL;
+    // tensor->gra_op = &(GradMethod){
+    //     NULL,
+    //     &(Tensor){
+    //         (float) 1.0,
+    //         {1},
+    //         TENSOR_1D,
+    //         NULL
+    //     }
+    // }; 
     return tensor;
 }
 
