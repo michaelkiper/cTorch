@@ -57,14 +57,14 @@ void test_linear_forward(bool debug) {
 void test_matmul_backwards() {
     Tensor* t1 = tensor((int[]){2, 3}, 2);
     Tensor* t2 = tensor((int[]){3, 4}, 2);
-    custom_init(t1, (float[]){
+    set_tensor(t1, (float[]){
+        2.0f, 4.0f,  6.0f, 
+        0.5f, 1.0f, 1.5f
+    });
+    set_tensor(t2, (float[]){
         1.0f, 2.0f, 3.0f, 4.0f, 
         1.0f, 2.0f, 3.0f, 4.0f, 
         1.0f, 2.0f, 3.0f, 4.0f
-    });
-    custom_init(t2, (float[]){
-        2.0f, 4.0f,  6.0f, 
-        0.5f, 1.0f, 1.5f
     });
 
     // Tensor* output = matmul(t1, t2);

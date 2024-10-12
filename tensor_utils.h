@@ -34,6 +34,17 @@ int ndims(n_dims N_dims) {
     exit(1);
 }
 
+
+int get_size(int size[], n_dims N_dims) {
+    // returns the number of elements in the tensor
+    int num_elements = 1;
+    for (int i = 0; i < ndims(N_dims); i++) {
+        num_elements *= size[i];
+    }
+    return num_elements;
+}
+
+
 Tensor* copy_data(Tensor *input) {
     int size[] = {input->size[0], input->size[1]}; // QUESTION: why the hell does this result in a segfault if I don't include this?
     Tensor* output = tensor(input->size, ndims(input->dim));
@@ -133,6 +144,7 @@ void print_tensor(Tensor *tensor) {
             printf("Unsupported tensor dimension\n");
             exit(1);
     }
+    printf("\n");
 
     // printf("\n\tGrad: \n\t\t%lf\n", tensor->grad);
 }
@@ -141,17 +153,21 @@ void print_tensor(Tensor *tensor) {
 /*
 INITIALIZATION FUNCTIONS
 */
-void initer(Tensor *t, float (*setter)(Tensor*, float)) {
+typedef struct {
+    float* data;
+} SamplerContext;
+
+void initer(Tensor *t, float (*setter)(Tensor*, float, int[], SamplerContext*), SamplerContext *ctx) {
     switch (t->dim) {
         case TENSOR_1D:
             for (int i = 0; i < t->size[0]; i++) {
-                ((float*)t->data)[i] = setter(t, ((float*)t->data)[i]);
+                ((float*)t->data)[i] = setter(t, ((float*)t->data)[i], (int[]){i}, ctx);
             }
             break;
         case TENSOR_2D:
             for (int i = 0; i < t->size[0]; i++) {
                 for (int j = 0; j < t->size[1]; j++) {
-                    ((float**)t->data)[i][j] = setter(t, ((float**)t->data)[i][j]);
+                    ((float**)t->data)[i][j] = setter(t, ((float**)t->data)[i][j], (int[]){i, j}, ctx);
                 }
             }
             break;
@@ -159,7 +175,7 @@ void initer(Tensor *t, float (*setter)(Tensor*, float)) {
             for (int i = 0; i < t->size[0]; i++) {
                 for (int j = 0; j < t->size[1]; j++) {
                     for (int k = 0; k < t->size[2]; k++) {
-                        ((float***)t->data)[i][j][k] = setter(t, ((float***)t->data)[i][j][k]);
+                        ((float***)t->data)[i][j][k] = setter(t, ((float***)t->data)[i][j][k], (int[]){i, j, k}, ctx);
                     }
                 }
             }
@@ -169,7 +185,7 @@ void initer(Tensor *t, float (*setter)(Tensor*, float)) {
                 for (int j = 0; j < t->size[1]; j++) {
                     for (int k = 0; k < t->size[2]; k++) {
                         for (int l = 0; l < t->size[3]; l++) {
-                            ((float****)t->data)[i][j][k][l] = setter(t, ((float****)t->data)[i][j][k][l]);
+                            ((float****)t->data)[i][j][k][l] = setter(t, ((float****)t->data)[i][j][k][l], (int[]){i, j, k, l}, ctx);
                         }
                     }
                 }
@@ -178,13 +194,20 @@ void initer(Tensor *t, float (*setter)(Tensor*, float)) {
     }
 }
 
+float one_sampler(Tensor *t, float _, int __[], SamplerContext *ctx) {
+    return 1.0;
+}
+void one_init(Tensor *t) {
+    initer(t, one_sampler, (SamplerContext*){NULL});
+}
+
 float random_uniform() {
     // returns a uniform random number between 0 and 1
     // To get a range of [low, high], do: `low + random_uniform() * (high - low)`
     return ((float) rand () / RAND_MAX);
 }
 
-float xavier_sampler(Tensor *t, float _) {
+float xavier_sampler(Tensor *t, float _, int __[], SamplerContext *ctx) {
     /* 
     this will perform the xavier initialization 
     https://proceedings.mlr.press/v9/glorot10a/glorot10a.pdf
@@ -223,23 +246,10 @@ float xavier_sampler(Tensor *t, float _) {
     return (-alpha) + random_uniform()*(alpha*2);
 }
 void xavier_uniform_init(Tensor *t) {
-    initer(t, xavier_sampler);
+    initer(t, xavier_sampler, (SamplerContext*){NULL});
 }
 
-float one_sampler(Tensor *t, float _) {
-    return 1.0;
-}
-void one_init(Tensor *t) {
-    initer(t, one_sampler);
-}
-
-
-void custom_init(Tensor *t, float data[]) {
-    initer(t, NULL);
-}
-
-
-float kaiming_sampler(Tensor *t, float _) {
+float kaiming_sampler(Tensor *t, float _, int __[], SamplerContext *ctx) {
     /* 
     this will perform the kaiming initialization 
     https://arxiv.org/pdf/1502.01852.pdf
@@ -288,9 +298,40 @@ float kaiming_sampler(Tensor *t, float _) {
 
 }
 void kaiming_uniform_init(Tensor *t) {
-    initer(t, kaiming_sampler);
+    initer(t, kaiming_sampler, (SamplerContext*){NULL});
 }
 
-// TODO: have kaiming_uniform_init have a function in it that takes in parameter and then returns a function
+float custom_sampler(Tensor *t, float _, int index[], SamplerContext *ctx) {
+    int linear_index = 0;
+    int multiplier = 1;
+
+    // Calculate the linear index in the flat data array based on the Tensor's dimensions
+    for (int i = t->dim - 1; i >= 0; i--) {
+        linear_index += index[i] * multiplier;
+        multiplier *= t->size[i];
+    }
+
+    return ctx->data[linear_index];
+}
+
+void set_tensor(Tensor *t, float data[]) {
+    SamplerContext ctx = {data};
+    initer(t, custom_sampler, &ctx);
+}
+
+
+void set_tensor_2(Tensor *t, float data[]) {
+    // free(t->data);
+    int n = get_size(t->size, t->dim);
+    print_tensor(t);
+    // t->data = (float*)malloc(n * sizeof(float));
+    for (int i = 0; i < n; i++) {
+        t->data[i] = data[i];
+        printf("%f\n", data[i]);
+        printf("%f\n", (t->data)[i]);
+    }
+    print_tensor(t);
+    // printf("%d\n", n);
+}
 
 #endif
