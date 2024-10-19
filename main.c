@@ -23,13 +23,11 @@ int main (int argc, char *argv[]) {
     Size *s = size((int[]){3, 4});
     Tensor *t = tensor(s);
     print_tensor(t);
-    // for (int i = 0; i < s->size[0]; i++) {
-    //     for (int j = 0; j < s->size[1]; j++) {
-    //         ((float**) t->data)[i][j] = 1;
-    //     }
-    // }
-    // print_tensor(t);
     one_init(t);
+    print_tensor(t);
+    xavier_uniform_init(t);
+    print_tensor(t);
+    kaiming_uniform_init(t);
     print_tensor(t);
 
 
