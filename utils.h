@@ -1,5 +1,5 @@
-#ifndef UTILS_H_
-#define UTILS_H_
+#ifndef UTILS_H
+#define UTILS_H
 
 #define ARRAYSIZE(a) (sizeof(a) / sizeof((a)[0]))
 

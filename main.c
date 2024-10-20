@@ -3,7 +3,7 @@
 #include "tensor.h"
 #include "tensor_utils.h"
 // #include "utils.h"
-// #include "NN.c"
+#include "NN.h"
 
 int main (int argc, char *argv[]) {
     // xavier_uniform_init(&t1);
@@ -29,6 +29,10 @@ int main (int argc, char *argv[]) {
     print_tensor(t);
     kaiming_uniform_init(t);
     print_tensor(t);
+
+
+    Linear *l = linear(s);
+    print_linear(l);
 
 
     // Linear* l = linear_1d((int[]){3, 4}, (int[]){3}, KAIMING);

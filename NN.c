@@ -1,80 +1,76 @@
-#include "tensor.h"
-#include "tensor_op.c"
-#include "tensor_utils.h"
+#include "NN.h"
 #include <math.h>
 #include <errno.h>
 
-typedef struct Linear Linear;
-struct Linear {
-    Tensor* weight;
-    Tensor* bias;
-    Tensor* (*forward)(Linear*, Tensor*);
-};
-
-Tensor* linear_forward_1d(Linear* layer, Tensor *input) {
-    if (input->dim != TENSOR_1D) {
-        return handle_error("The input tensor must be 1D", EINVAL);
-    }
-
-    Tensor* output = matmul(input, layer->weight);
-    output = add(layer->bias, output);
-    return output;
+void print_linear(Linear* l) {
+    printf("********* Linear Neuron *********\n");
+    printf("*** Weights: ***\n");
+    print_tensor(l->weight);
+    printf("*** Bias: ***\n");
+    print_tensor(l->bias);
 }
 
+
+// Tensor* linear_forward(Linear* layer, Tensor *input) {
+//     // if (input->size->dims != TENSOR_1D) {
+//     //     return handle_error("The input tensor must be 1D", EINVAL);
+//     // }
+
+//     Tensor* output = matmul(input, layer->weight);
+//     output = add(layer->bias, output);
+//     return output;
+// }
+
 // For now, the Neaural Network will only support the 1D case
-Linear* linear_1d(int proj_dim[2], int bias_dim[0], init_type _init_type) {
-    // `proj_dim` should be of shape: {input_dim, output_dim}
-    if (proj_dim[1] != bias_dim[0]) {
-        printf("The input and output dimensions of the weight and bias must be the same\n");
-        exit(1);
+Linear* linear(Size* s) {
+    if (s->dims != TENSOR_2D && s->dims != TENSOR_1D) {
+        printf("Currently only handles 1D and 2D Linear Neurons\n");
+        return NULL;
     }
+    Size* bias_size = size(
+        (int[]){1, (s->dims == TENSOR_2D ? s->size[1] : 1)}
+        // (int[]){s->dims == TENSOR_2D ? s->size[0]: 1, (s->dims == TENSOR_2D ? s->size[1] : s->size[0])}
+    );
     Linear *linear = (Linear*)malloc(sizeof(Linear));
-    linear->weight = tensor(proj_dim, 2);
-    linear->bias = tensor(bias_dim, 1);
+    linear->weight = tensor(s);
+    linear->bias = tensor(bias_size);
 
     one_init(linear->bias); // one init the bias
-    switch (_init_type) {
+
+    switch (INIT_METHOD) {
         case (KAIMING): {
             kaiming_uniform_init(linear->weight);
         }
         case (XAVIER): {
             xavier_uniform_init(linear->weight);
-        }
+        } 
     }
-    linear->forward = linear_forward_1d;
-
     return linear;
 }
 
-
-Tensor* non_linearity(Tensor *input, float (*nl)(Tensor*, float, int *, SamplerContext *)){
-    Tensor* output = copy_data(input);
-    initer(output, nl, (SamplerContext*){NULL});
-    return output;
+static void non_linearity(Tensor *t, void func(float*)){
+    int* indices = (int*)malloc(sizeof(t->size->size));
+    InitContext* i = (InitContext*)malloc(sizeof(InitContext));
+    while (!i->done) {
+        float* v = initer(t, i);
+        func(v);
+        incrementer(i, t->size);
+    }
+    free(indices);
+    free(i);
 }
 
-float _relu_func(Tensor *t, float val) {
-    if (val > 0) { return val; }
-    return 0;
-}
-Tensor* ReLU(Tensor *input) {
-    return non_linearity(input, _relu_func);
-}
+static void _relu_func(float* val) { if ((*val) < 0) { *val = 0.0; } }
+void ReLU(Tensor *input) { non_linearity(input, _relu_func); }
 
-float _gelu_func(Tensor *t, float val) {
+static void _gelu_func(float* val) {
     // performs the GELU approximate function
-    return 0.5 * val * (1 + tanh(sqrt(2 / M_PI) * (val + 0.044715 * pow(val, 3))));
+    *val = 0.5 * (*val) * (1 + tanh(sqrt(2 / M_PI) * ((*val) + 0.044715 * pow((*val), 3))));
 }
-Tensor* GELU(Tensor *input) {
-    return non_linearity(input, _gelu_func);
-}
+void GELU(Tensor *input) { non_linearity(input, _gelu_func); }
 
-float _tanh(Tensor *t, float val) {
-    return tanh(val);
-}
-Tensor* Tanh(Tensor *input) {
-    return non_linearity(input, _tanh);
-}
+static void _tanh(float* val) { *val = tanh(*val); }
+void Tanh(Tensor *input) { non_linearity(input, _tanh); }
 
 /*
 TODO: other activation functions:
