@@ -28,7 +28,8 @@ Linear* linear(Size* s) {
         return NULL;
     }
     Size* bias_size = size(
-        (int[]){1, (s->dims == TENSOR_2D ? s->size[1] : 1)}
+        (int[]){1, (s->dims == TENSOR_2D ? s->size[1] : 1)},
+        2
         // (int[]){s->dims == TENSOR_2D ? s->size[0]: 1, (s->dims == TENSOR_2D ? s->size[1] : s->size[0])}
     );
     Linear *linear = (Linear*)malloc(sizeof(Linear));

@@ -91,14 +91,13 @@ Tensor* tensor(Size *size) {
     return tensor;
 }
 
-Size* size(int *size) {
+Size* size(int *size, n_dims d) {
     Size* tensor_size = (Size*)malloc(sizeof(Size));
     if (tensor_size == NULL) {
         printf("Memory allocation failed for tensor size.\n");
         exit(EXIT_FAILURE);
     }
-    // printf("%d array size\n", ARRAYSIZE(size));
-    tensor_size->dims = DIM_MAP[ARRAYSIZE(size)];
+    tensor_size->dims = DIM_MAP[d];
     tensor_size->size = size;
     return tensor_size;
 }

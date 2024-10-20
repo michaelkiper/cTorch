@@ -34,7 +34,7 @@ void init_tensor_data(Tensor *tensor);
 
 Tensor* tensor(Size *size);
 
-Size* size(int size[]);
+Size* size(int size[], n_dims d);
 
 int ndims(n_dims N_dims);
 

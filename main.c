@@ -20,7 +20,7 @@ int main (int argc, char *argv[]) {
     // print_tensor(t3);
 
 
-    Size *s = size((int[]){3, 4});
+    Size *s = size((int[]){3, 4}, 2);
     Tensor *t = tensor(s);
     print_tensor(t);
     one_init(t);
